@@ -1,5 +1,32 @@
 <!DOCTYPE html>
 <style>
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.tooltip{
+  text-anchor: middle;
+  font-family: sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  fill:black; 
+}
+
 table {
   border-collapse: collapse;
   border: 2px black solid;
@@ -11,10 +38,15 @@ td {
   padding: 5px;
 }
 </style>
-
+<div>
 <button>Reset</button>
 <svg width="1200" height="800"></svg>
-<table id="table" width="1200" height="800">
+</div>
+<div>
+<table id="table"></table>
+</div>
+
+
 
 
 
@@ -70,7 +102,27 @@ d3.csv("hbase.csv", function(d, i, columns) {
       .attr("x", function(d) { return x(d.data.ReqID); })
       .attr("y", function(d) { return y(d[1]); })
       .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-      .attr("width", x.bandwidth());
+      .attr("width", x.bandwidth()).on("mouseover", function(d){
+
+          var delta = d.y1 - d.y0;
+          var xPos = parseFloat(d3.select(this).attr("x"));
+          var yPos = parseFloat(d3.select(this).attr("y"));
+          var height = parseFloat(d3.select(this).attr("height"))
+
+          d3.select(this).attr("stroke","blue").attr("stroke-width",0.8);
+
+          svg.append("text")
+          .attr("x",xPos)
+          .attr("y",yPos +height/2)
+          .attr("class","tooltip")
+          .text(d.name +": "+ delta); 
+          
+       })
+       .on("mouseout",function(){
+          svg.select(".tooltip").remove();
+          d3.select(this).attr("stroke","pink").attr("stroke-width",0.2);
+                                
+        });
 
   g.append("g")
       .attr("class", "axis")
@@ -150,7 +202,7 @@ d3.text("hbase.csv", function(data) {
 
 
 
-</table>
+
 
 
 
