@@ -116,7 +116,7 @@ var tooltip = d3.select("svg").append("div").attr("class","tooltip").style("opac
       .attr("width", function(d) { return x(d[1]) - x(d[0]); })	//.attr("height", function(d) { return y(d[0]) - y(d[1]); })
       .attr("height", y.bandwidth());		
 
-g.selectAll("rect").on("mouseover", function(d){
+g.selectAll("rect").on("click", function(d){
 	
 	         	
 	          d3.select(this).attr("stroke","blue").attr("stroke-width",0.8);
