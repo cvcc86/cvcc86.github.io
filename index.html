@@ -1,5 +1,7 @@
 <!DOCTYPE html>
+<meta charset="utf-8">
 <style>
+
 body {
   font: 10px sans-serif;
 }
@@ -37,18 +39,16 @@ td {
   border: 1px black solid;
   padding: 5px;
 }
+
 </style>
+
 <div>
 <button>Reset</button>
-<svg width="1200" height="800"></svg>
+<svg width="1200" height="1600"></svg>
 </div>
 <div>
 <table id="table"></table>
 </div>
-
-
-
-
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
@@ -64,18 +64,15 @@ var zoom = d3.zoom()
     .translateExtent([[-100, -100], [width + 90, height + 100]])
     .on("zoom", zoomed);
 
-
-var x = d3.scaleBand()
-    .rangeRound([0, width])
+var y = d3.scaleBand()			// x = d3.scaleBand()	
+    .rangeRound([0, height])	// .rangeRound([0, width])
     .paddingInner(0.05)
     .align(0.1);
 
-var y = d3.scaleLinear()
-    .rangeRound([height, 0]);
+var x = d3.scaleLinear()		// y = d3.scaleLinear()
+    .rangeRound([0, width]);	// .rangeRound([height, 0]);
 
 var z = d3.scaleOrdinal(d3.schemeCategory20c);
-
-
 
 d3.csv("hbase.csv", function(d, i, columns) {
   for (i = 1, t = 0; i < columns.length; ++i) t += d[columns[i]] = +d[columns[i]];
@@ -87,8 +84,8 @@ d3.csv("hbase.csv", function(d, i, columns) {
   var keys = data.columns.slice(1);
 
   data.sort(function(a, b) { return b.total - a.total; });
-  x.domain(data.map(function(d) { return d.ReqID; }));
-  y.domain([0, d3.max(data, function(d) { return d.total; })]).nice();
+  y.domain(data.map(function(d) { return d.ReqID; }));					// x.domain...
+  x.domain([0, d3.max(data, function(d) { return d.total; })]).nice();	// y.domain...
   z.domain(keys);
 
   g.append("g")
@@ -99,47 +96,29 @@ d3.csv("hbase.csv", function(d, i, columns) {
     .selectAll("rect")
     .data(function(d) { return d; })
     .enter().append("rect")
-      .attr("x", function(d) { return x(d.data.ReqID); })
-      .attr("y", function(d) { return y(d[1]); })
-      .attr("height", function(d) { return y(d[0]) - y(d[1]); })
-      .attr("width", x.bandwidth()).on("mouseover", function(d){
-
-          var delta = d.y1 - d.y0;
-          var xPos = parseFloat(d3.select(this).attr("x"));
-          var yPos = parseFloat(d3.select(this).attr("y"));
-          var height = parseFloat(d3.select(this).attr("height"))
-
-          d3.select(this).attr("stroke","blue").attr("stroke-width",0.8);
-
-          svg.append("text")
-          .attr("x",xPos)
-          .attr("y",yPos +height/2)
-          .attr("class","tooltip")
-          .text(d.name +": "+ delta); 
-          
-       })
-       .on("mouseout",function(){
-          svg.select(".tooltip").remove();
-          d3.select(this).attr("stroke","pink").attr("stroke-width",0.2);
-                                
-        });
+      .attr("y", function(d) { return y(d.data.ReqID); })	    //.attr("x", function(d) { return x(d.data.ReqID); })
+      .attr("x", function(d) { return x(d[0]); })			    //.attr("y", function(d) { return y(d[1]); })	
+      .attr("width", function(d) { return x(d[1]) - x(d[0]); })	//.attr("height", function(d) { return y(d[0]) - y(d[1]); })
+      .attr("height", y.bandwidth());						    //.attr("width", x.bandwidth());	
 
   g.append("g")
       .attr("class", "axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+      .attr("transform", "translate(0,0)") 						//  .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisLeft(y));									//   .call(d3.axisBottom(x));
 
   g.append("g")
       .attr("class", "axis")
-      .call(d3.axisLeft(y).ticks(null, "s"))
+	  .attr("transform", "translate(0,"+height+")")				// New line
+      .call(d3.axisBottom(x).ticks(null, "s"))					//  .call(d3.axisLeft(y).ticks(null, "s"))
     .append("text")
-      .attr("x", 2)
-      .attr("y", y(y.ticks().pop()) + 0.5)
-      .attr("dy", "0.32em")
+      .attr("y", 2)												//     .attr("y", 2)
+      .attr("x", x(x.ticks().pop()) + 0.5) 						//     .attr("y", y(y.ticks().pop()) + 0.5)
+      .attr("dy", "0.32em")										//     .attr("dy", "0.32em")
       .attr("fill", "#000")
       .attr("font-weight", "bold")
       .attr("text-anchor", "start")
-      .text("Total-Latency");
+      .text("Total Lattency")
+	  .attr("transform", "translate("+ (-width) +",-10)");   	// Newline
 
   var legend = g.append("g")
       .attr("font-family", "sans-serif")
@@ -148,7 +127,8 @@ d3.csv("hbase.csv", function(d, i, columns) {
     .selectAll("g")
     .data(keys.slice().reverse())
     .enter().append("g")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+    //.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+	 .attr("transform", function(d, i) { return "translate(-50," + (300 + i * 20) + ")"; });
 
   legend.append("rect")
       .attr("x", width - 19)
@@ -162,11 +142,10 @@ d3.csv("hbase.csv", function(d, i, columns) {
       .attr("dy", "0.32em")
       .text(function(d) { return d; });
 });
-  d3.select("button")
+
+d3.select("button")
     .on("click", resetted);
-
   svg.call(zoom);
-
   function zoomed() {
       g.attr("transform", d3.event.transform);
       gX.call(xAxis.scale(d3.event.transform.rescaleX(x)));
@@ -178,15 +157,14 @@ d3.csv("hbase.csv", function(d, i, columns) {
       .call(zoom.transform, d3.zoomIdentity);
   }
 
+
 d3.text("hbase.csv", function(data) {
     var parsedCSV = d3.csvParseRows(data);
     var container = d3.select("#table")
         .append("table")
-
     .selectAll("tr")
         .data(parsedCSV).enter()
         .append("tr")
-
     .selectAll("td")
         .data(function(d) {
             return d;
@@ -197,8 +175,9 @@ d3.text("hbase.csv", function(data) {
         });
 });
 
-</script>
 
+
+</script>
 
 
 
