@@ -53,11 +53,11 @@ td {
 
 <body>  
 
-<button>Reset</button>
+<center>
 <svg width="1200" height="1400"></svg>
 
 <table id="table"></table>
-
+</center>
 
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
@@ -94,7 +94,13 @@ d3.csv("hbase.csv", function(d, i, columns) {
 }, function(error, data) {
   if (error) throw error;
 
+
   var keys = data.columns.slice(1);
+
+
+
+
+
 
   data.sort(function(a, b) { return b.total - a.total; });
   y.domain(data.map(function(d) { return d.ReqID; }));					// x.domain...
@@ -119,14 +125,26 @@ var tooltip = d3.select("svg").append("div").attr("class","tooltip").style("opac
 g.selectAll("rect").on("click", function(d){
 	
 	         	
-	          d3.select(this).attr("stroke","blue").attr("stroke-width",0.8);
-		console.log("abc");
-
+ 	d3.select(this).attr("stroke","blue").attr("stroke-width",0.8);
+		
 	
-	div.transition()
+	div.transition().style("opacity", .9);
+	var s1 = "<table><tr><td>ReqID</td>";
+	for(var i = 0, l = keys.length; i < l; i++) {
+       		s1 = s1 + "<td>" + keys[i] + "</td>";
+    	}
+	s1 = s1 + "</tr>";
+	s2 = "<tr><td>"+ d.data.ReqID +"</td>";
+	for(var i = 0, l = keys.length; i < l; i++) {
+		for (var prop in d.data) {
+		if(keys[i] == prop)
+  		s2 = s2 + "<td>" + d.data[prop] + "</td>";
+		}
+    	}
+	s2 = s2 + "</tr>" + "</table>";
 
-         .style("opacity", .9);
-       div.html("<table><tr><th>ReqID</th><th>Phase1-Running</th><th>Phase2-Runnable</th><th>Phase3-Waiting</th><th>Gap</th><th>Phase2-Running</th><th>6</th><th>7</th><th>8</th></tr><tr><td>"+ d.data.ReqID + "</td><td>"+ d[0]+"</td><td>" +  d[1] + "</td><td>"+ d[2]+"</td><td>"+ d[0]+"</td><td>"+ d[0]+"</td></tr></table>")
+
+       div.html(s1 + s2)
          .style("left", (d3.event.pageX) + "px")
          .style("top", (d3.event.pageY + 20) + "px");
 	          
